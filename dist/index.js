@@ -18,42 +18,54 @@ var useFileUpload = function useFileUpload() {
       files = _useState[0],
       setFiles = _useState[1];
 
-  var onChange = function onChange(e) {
-    var parsedFiles = [];
-    var target = e.target;
+  var userCallback = function userCallback() {};
 
-    for (var fileIndex in target.files) {
-      if (isNaN(fileIndex)) {
-        continue;
+  var onChange = function onChange(e) {
+    try {
+      var parsedFiles = [];
+      var target = e.target;
+
+      for (var fileIndex in target.files) {
+        if (isNaN(fileIndex)) {
+          continue;
+        }
+
+        var file = target.files[fileIndex];
+        var parsedFile = {
+          source: URL.createObjectURL(file),
+          name: file.name,
+          size: file.size,
+          file: file
+        };
+        parsedFiles.push(parsedFile);
       }
 
-      var file = target.files[fileIndex];
-      var parsedFile = {
-        url: URL.createObjectURL(file),
-        name: file.name,
-        size: file.size,
-        file: file
-      };
-      parsedFiles.push(parsedFile);
+      target.removeEventListener('change', onChange);
+      target.remove();
+
+      if (target.multiple) {
+        setFiles(parsedFiles);
+        return Promise.resolve(userCallback(parsedFiles));
+      }
+
+      setFiles(parsedFiles[0]);
+      return Promise.resolve(userCallback(parsedFiles[0]));
+    } catch (e) {
+      return Promise.reject(e);
     }
-
-    target.removeEventListener('change', onChange);
-    target.remove();
-
-    if (target.multiple) {
-      return setFiles(parsedFiles);
-    }
-
-    return setFiles(parsedFiles[0]);
   };
 
-  var uploadFile = function uploadFile(_temp) {
+  var uploadFile = function uploadFile(_temp, cb) {
     var _ref2 = _temp === void 0 ? {
       accept: '',
       multiple: false
     } : _temp,
         accept = _ref2.accept,
         multiple = _ref2.multiple;
+
+    if (typeof cb === 'function') {
+      userCallback = cb;
+    }
 
     var inputEL = createInputComponent({
       multiple: multiple,

@@ -14,7 +14,9 @@ function createInputComponent({
 const useFileUpload = () => {
   const [files, setFiles] = useState(null);
 
-  const onChange = e => {
+  let userCallback = () => {};
+
+  const onChange = async e => {
     const parsedFiles = [];
     const target = e.target;
 
@@ -25,7 +27,7 @@ const useFileUpload = () => {
 
       const file = target.files[fileIndex];
       const parsedFile = {
-        url: URL.createObjectURL(file),
+        source: URL.createObjectURL(file),
         name: file.name,
         size: file.size,
         file
@@ -37,10 +39,12 @@ const useFileUpload = () => {
     target.remove();
 
     if (target.multiple) {
-      return setFiles(parsedFiles);
+      setFiles(parsedFiles);
+      return userCallback(parsedFiles);
     }
 
-    return setFiles(parsedFiles[0]);
+    setFiles(parsedFiles[0]);
+    return userCallback(parsedFiles[0]);
   };
 
   const uploadFile = ({
@@ -49,7 +53,11 @@ const useFileUpload = () => {
   } = {
     accept: '',
     multiple: false
-  }) => {
+  }, cb) => {
+    if (typeof cb === 'function') {
+      userCallback = cb;
+    }
+
     const inputEL = createInputComponent({
       multiple,
       accept

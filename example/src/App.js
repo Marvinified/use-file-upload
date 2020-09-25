@@ -1,23 +1,25 @@
 import React from 'react'
-
+import './index.css'
 import { useFileUpload } from 'use-file-upload'
-
 const App = () => {
+  const defaultSrc =
+    'https://www.pngkit.com/png/full/301-3012694_account-user-profile-avatar-comments-fa-user-circle.png'
+
   const [files, selectFiles] = useFileUpload()
-  console.log(files)
+
   return (
-    <>
+    <div id='app'>
+      <img src={files?.source || defaultSrc} alt='preview' />
       <button
-        onClick={() => {
-          selectFiles({ multiple: true })
-          console.log(files)
-        }}
+        onClick={() =>
+          selectFiles({ accept: 'image/*' }, ({ name, size, source, file }) => {
+            console.log('Files Selected', { name, size, source, file })
+          })
+        }
       >
-        Click to Upload
+        Upload Avatar
       </button>
-      {files && `${JSON.stringify(files)} Uploaded`}
-    </>
+    </div>
   )
 }
-
 export default App
