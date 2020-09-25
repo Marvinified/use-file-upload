@@ -13,9 +13,10 @@ function createInputComponent({ multiple, accept }) {
 
 export const useFileUpload = () => {
   const [files, setFiles] = useState(null)
+  let userCallback = () => {}
 
   // Handle onChange event
-  const onChange = (e) => {
+  const onChange = async (e) => {
     const parsedFiles = []
     const target = e.target
 
@@ -32,7 +33,7 @@ export const useFileUpload = () => {
       // select properties
 
       const parsedFile = {
-        url: URL.createObjectURL(file),
+        source: URL.createObjectURL(file),
         name: file.name,
         size: file.size,
         file // original file object
@@ -49,16 +50,26 @@ export const useFileUpload = () => {
     target.remove()
 
     // update files state hook
+
     if (target.multiple) {
-      return setFiles(parsedFiles)
+      setFiles(parsedFiles)
+      return userCallback(parsedFiles)
     }
-    return setFiles(parsedFiles[0])
+
+    setFiles(parsedFiles[0])
+    return userCallback(parsedFiles[0])
+
+    // user specified callback
   }
 
   // Handle upload
   const uploadFile = (
-    { accept, multiple } = { accept: '', multiple: false }
+    { accept, multiple } = { accept: '', multiple: false },
+    cb
   ) => {
+    if (typeof cb === 'function') {
+      userCallback = cb
+    }
     // create virtual input element
     const inputEL = createInputComponent({ multiple, accept })
     // add event listener
