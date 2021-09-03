@@ -9,7 +9,5 @@ declare module "use-file-upload" {
 
     type Callback = (file: FileUpload | [FileUpload]) => void
 
-    const useFileUpload: () => [file: FileUpload | [FileUpload], selectFiles: ({ accept: string, multiple: boolean }, callback: Callback) => void]
+    const useFileUpload: () => [FileUpload | [FileUpload], ({ accept: string, multiple: boolean }, callback: Callback) => void]
 }
-
-// }
